@@ -1,0 +1,59 @@
+---
+- hosts: all
+  vars:
+    local_app_dir: "../photogallery_v2"
+    remote_home: "/home/ec2-user"
+    remote_app_dir: "{{ remote_home}}/photogallery"
+
+  tasks:
+#    - name: copy application directory
+#      copy:
+#        src: "{{ local_app_dir }}/"
+#        dest: "{{ remote_app_dir }}"
+#      register: app  # save task output 
+
+    - name: Update all packages to their latest version
+      become: yes
+      apt:
+        upgrade: full
+
+    - name: install docker compose
+      become: yes # we need root privileges 
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: yes
+
+#    - name: install Flask
+#      become: yes 
+#      pip:
+#        name: flask
+#        executable: pip3
+
+#    - name: install boto3
+#      become: yes 
+#      pip:
+#        name: boto3
+#        executable: pip3
+
+#    - name: copy systemd unit file
+#      become: yes 
+#      copy:
+#        src: "photogallery.service"
+#        dest: "/etc/systemd/system/"
+
+#    - name: enable and start systemd service
+#      become: yes 
+#      systemd:
+#        daemon_reload: yes
+#        state: restarted
+#        name: "photogallery.service"
+#        enabled: yes
+#      when: app.changed # only restart if new version was uploaded
+
+
+
+
+
+
+
