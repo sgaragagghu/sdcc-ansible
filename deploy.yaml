@@ -1,9 +1,9 @@
 ---
 - hosts: all
   vars:
-    local_app_dir: "../photogallery_v2"
-    remote_home: "/home/ec2-user"
-    remote_app_dir: "{{ remote_home}}/photogallery"
+    local_app_dir: "../sdcc-docker"
+    remote_home: "/home/admin"
+    remote_app_dir: "{{ remote_home}}/docker"
 
   tasks:
 #    - name: copy application directory
@@ -12,17 +12,63 @@
 #        dest: "{{ remote_app_dir }}"
 #      register: app  # save task output 
 
+    - name: Update apt cache
+      become: yes
+      apt:
+        update_cache: yes
+ 
     - name: Update all packages to their latest version
       become: yes
       apt:
         upgrade: full
 
-    - name: install docker compose
+    - name: install needed packages
       become: yes # we need root privileges 
       apt:
-        name: docker-compose
+        name: 
+          - docker-compose
+          - python3
+          - python3-docker
+          - python3-pip
+          - rsync
         state: present
-        update_cache: yes
+
+    - name: pip pip3 alias
+      become: yes
+      community.general.alternatives:
+        link: /usr/bin/pip
+        path: /usr/bin/pip3
+        name: pip
+        state: present
+
+    - name: python python3 alias
+      become: yes
+      community.general.alternatives:
+        link: /usr/bin/python
+        path: /usr/bin/python3
+        name: python
+        state: present
+
+
+#    - name: install docker-compose python module
+#      become: yes
+#      pip:
+#        name: 
+#          - docker-compose
+#        state: present
+
+    - name: sync dockefile
+      synchronize:
+        src: "{{ local_app_dir }}/"
+        dest: "{{ remote_app_dir }}"
+#      register: docker  # save task output 
+
+    - name: docker-compose up
+      become: yes
+      community.docker.docker_compose:
+        project_src: "{{remote_app_dir}}"
+        state: present
+
 
 #    - name: install Flask
 #      become: yes 
