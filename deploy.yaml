@@ -3,7 +3,7 @@
   vars:
     local_app_dir: "../sdcc-docker"
     remote_home: "/home/admin"
-    remote_app_dir: "{{ remote_home}}/docker"
+    remote_app_dir: "{{remote_home}}/docker"
 
   tasks:
 #    - name: copy application directory
