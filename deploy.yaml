@@ -1,9 +1,15 @@
 ---
 - hosts: all
   vars:
-    local_app_dir: "../sdcc-docker"
-    remote_home: "/home/admin"
-    remote_app_dir: "{{remote_home}}/docker"
+    local_docker_dir:       "../sdcc-docker"
+    local_git_keypair_dir:  "../sdcc-go-github-keypair" # for development
+    local_ssh_scripts_dir:  "../sdcc-ssh"               # for development
+    local_app_dir:          "../sdcc-go"
+    remote_home:            "/home/admin"
+    remote_docker_dir:      "{{remote_home}}/sdcc-docker"
+    remote_git_keypair_dir: "{{remote_docker_dir}}/sdcc-go-github-keypair" # for development
+    remote_ssh_scripts_dir: "{{remote_docker_dir}}/sdcc-ssh"          # for development
+    remote_app_dir:         "{{remote_docker_dir}}/sdcc-go"
 
   tasks:
 #    - name: copy application directory
@@ -59,14 +65,44 @@
 
     - name: sync dockefile
       synchronize:
+        src: "{{ local_docker_dir }}/"
+        dest: "{{ remote_docker_dir }}"
+#      register: docker  # save task output 
+
+    - name: sync github keys
+      synchronize:
+        src: "{{ local_git_keypair_dir }}/"
+        dest: "{{ remote_git_keypair_dir }}"
+#      register: git_kaypair  # save task output 
+
+    - name: sync go app
+      synchronize:
         src: "{{ local_app_dir }}/"
         dest: "{{ remote_app_dir }}"
-#      register: docker  # save task output 
+#      register: go_app  # save task output 
+
+    - name: sync ssh scripts
+      synchronize:
+        src: "{{ local_ssh_scripts_dir }}/"
+        dest: "{{ remote_ssh_scripts_dir }}"
+#      register: go_app  # save task output 
+
+    - name: copy default profile
+      copy:
+        src: "/etc/skel"
+        dest: "{{ remote_docker_dir }}/skel"
+        remote_src: "yes"
+#      register: go_app  # save task output 
+
+    - name: make dockefiles
+      make:
+        chdir: "{{remote_docker_dir}}"
+        target: all
 
     - name: docker-compose up
       become: yes
       community.docker.docker_compose:
-        project_src: "{{remote_app_dir}}"
+        project_src: "{{remote_docker_dir}}"
         state: present
 
 
