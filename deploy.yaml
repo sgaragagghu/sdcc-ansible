@@ -8,7 +8,7 @@
     remote_home:            "/home/admin"
     remote_docker_dir:      "{{remote_home}}/sdcc-docker"
     remote_git_keypair_dir: "{{remote_docker_dir}}/sdcc-go-github-keypair" # for development
-    remote_ssh_scripts_dir: "{{remote_docker_dir}}/sdcc-ssh"          # for development
+    remote_ssh_scripts_dir: "{{remote_docker_dir}}/sdcc-ssh"               # for development
     remote_app_dir:         "{{remote_docker_dir}}/sdcc-go"
 
   tasks:
@@ -39,7 +39,7 @@
           - rsync
         state: present
 
-    - name: pip pip3 alias
+    - name: pip pip3 alias # in out distribution pip points to pip version 2 instead of 3 as we need
       become: yes
       community.general.alternatives:
         link: /usr/bin/pip
@@ -47,7 +47,7 @@
         name: pip
         state: present
 
-    - name: python python3 alias
+    - name: python python3 alias # same as before, python points to python version 2 instead of 3
       become: yes
       community.general.alternatives:
         link: /usr/bin/python
@@ -63,79 +63,41 @@
 #          - docker-compose
 #        state: present
 
-    - name: sync dockefile
+    - name: sync dockefile # more or less like copy but faster
       synchronize:
         src: "{{ local_docker_dir }}/"
         dest: "{{ remote_docker_dir }}"
-#      register: docker  # save task output 
 
-    - name: sync github keys
+    - name: sync github keys # for development
       synchronize:
         src: "{{ local_git_keypair_dir }}/"
         dest: "{{ remote_git_keypair_dir }}"
-#      register: git_kaypair  # save task output 
 
     - name: sync go app
       synchronize:
         src: "{{ local_app_dir }}/"
         dest: "{{ remote_app_dir }}"
-#      register: go_app  # save task output 
 
     - name: sync ssh scripts
       synchronize:
         src: "{{ local_ssh_scripts_dir }}/"
         dest: "{{ remote_ssh_scripts_dir }}"
-#      register: go_app  # save task output 
 
-    - name: copy default profile
+    - name: copy default profile # bash profile for the new non-root user, by default there's only the root user
       copy:
         src: "/etc/skel"
         dest: "{{ remote_docker_dir }}/skel"
         remote_src: "yes"
-#      register: go_app  # save task output 
 
-    - name: make dockefiles
+    - name: make dockefiles # reducer, mapper and master share a base dockefile. make will create the actual dockerfiles merging the base dockefile with the respective ones
       make:
         chdir: "{{remote_docker_dir}}"
         target: all
 
-    - name: docker-compose up
+    - name: docker-compose up # starting docker-compose
       become: yes
       community.docker.docker_compose:
         project_src: "{{remote_docker_dir}}"
         state: present
-
-
-#    - name: install Flask
-#      become: yes 
-#      pip:
-#        name: flask
-#        executable: pip3
-
-#    - name: install boto3
-#      become: yes 
-#      pip:
-#        name: boto3
-#        executable: pip3
-
-#    - name: copy systemd unit file
-#      become: yes 
-#      copy:
-#        src: "photogallery.service"
-#        dest: "/etc/systemd/system/"
-
-#    - name: enable and start systemd service
-#      become: yes 
-#      systemd:
-#        daemon_reload: yes
-#        state: restarted
-#        name: "photogallery.service"
-#        enabled: yes
-#      when: app.changed # only restart if new version was uploaded
-
-
-
-
-
 
 
