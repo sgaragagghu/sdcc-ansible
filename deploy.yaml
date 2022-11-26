@@ -99,5 +99,8 @@
       community.docker.docker_compose:
         project_src: "{{remote_docker_dir}}"
         state: present
+        scale:
+          mapper: 2
+          redure: 2
 
 
