@@ -100,7 +100,7 @@
         project_src: "{{remote_docker_dir}}"
         state: present
         scale:
+          reducer: 2
           mapper: 2
-          redure: 2
 
 
