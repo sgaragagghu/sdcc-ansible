@@ -2,22 +2,16 @@
 - hosts: all
   vars:
     local_docker_dir:       "../sdcc-docker"
-    local_git_keypair_dir:  "../sdcc-go-github-keypair" # for development
-    local_ssh_scripts_dir:  "../sdcc-ssh"               # for development
+#    local_git_keypair_dir:  "../sdcc-go-github-keypair" # for development
+#    local_ssh_scripts_dir:  "../sdcc-ssh"               # for development
     local_app_dir:          "../sdcc-go"
     remote_home:            "/home/admin"
     remote_docker_dir:      "{{remote_home}}/sdcc-docker"
-    remote_git_keypair_dir: "{{remote_docker_dir}}/sdcc-go-github-keypair" # for development
-    remote_ssh_scripts_dir: "{{remote_docker_dir}}/sdcc-ssh"               # for development
+#    remote_git_keypair_dir: "{{remote_docker_dir}}/sdcc-go-github-keypair" # for development
+#    remote_ssh_scripts_dir: "{{remote_docker_dir}}/sdcc-ssh"               # for development
     remote_app_dir:         "{{remote_docker_dir}}/sdcc-go"
 
   tasks:
-#    - name: copy application directory
-#      copy:
-#        src: "{{ local_app_dir }}/"
-#        dest: "{{ remote_app_dir }}"
-#      register: app  # save task output 
-
     - name: Update apt cache
       become: yes
       apt:
@@ -55,33 +49,25 @@
         name: python
         state: present
 
-
-#    - name: install docker-compose python module
-#      become: yes
-#      pip:
-#        name: 
-#          - docker-compose
-#        state: present
-
     - name: sync dockefile # more or less like copy but faster
       synchronize:
         src: "{{ local_docker_dir }}/"
         dest: "{{ remote_docker_dir }}"
 
-    - name: sync github keys # for development
-      synchronize:
-        src: "{{ local_git_keypair_dir }}/"
-        dest: "{{ remote_git_keypair_dir }}"
+#    - name: sync github keys # for development
+#      synchronize:
+#        src: "{{ local_git_keypair_dir }}/"
+#        dest: "{{ remote_git_keypair_dir }}"
 
     - name: sync go app
       synchronize:
         src: "{{ local_app_dir }}/"
         dest: "{{ remote_app_dir }}"
 
-    - name: sync ssh scripts
-      synchronize:
-        src: "{{ local_ssh_scripts_dir }}/"
-        dest: "{{ remote_ssh_scripts_dir }}"
+#    - name: sync ssh scripts # for development
+#      synchronize:
+#        src: "{{ local_ssh_scripts_dir }}/"
+#        dest: "{{ remote_ssh_scripts_dir }}"
 
     - name: copy default profile # bash profile for the new non-root user, by default there's only the root user
       copy:
